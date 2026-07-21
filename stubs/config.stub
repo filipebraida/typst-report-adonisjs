@@ -6,8 +6,8 @@ import { defineConfig } from '@typst-report/adonisjs'
 
 export default defineConfig({
   /**
-   * The pinned Typst version: what `typst:install` downloads and what
-   * `typst:doctor` asserts. Typst is pre-1.0 and its layout shifts between
+   * The pinned Typst version: what 'typst:install' downloads and what
+   * 'typst:doctor' asserts. Typst is pre-1.0 and its layout shifts between
    * minors, so every template is a validated visual snapshot — moving this
    * is a deliberate act (bump here, re-check the documents), never a side
    * effect of a deploy.
@@ -18,7 +18,7 @@ export default defineConfig({
 
   /**
    * Families your templates name. Typst falls back silently when one is
-   * missing, so `typst:doctor` asserting them is what turns a wrong-looking
+   * missing, so 'typst:doctor' asserting them is what turns a wrong-looking
    * PDF into a failed deploy.
    */
   fonts: [],
@@ -27,7 +27,7 @@ export default defineConfig({
 
   /**
    * Files placed into every compile, keyed by the path templates import:
-   * `#import "lib/brand.typ"`, `image("img/logo.svg")`.
+   * #import "lib/brand.typ", image("img/logo.svg").
    */
   libraries: {
     // 'lib/brand.typ': { path: app.makePath('resources/typst/lib/brand.typ') },
