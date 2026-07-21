@@ -1,0 +1,43 @@
+{{{
+  exports({ to: app.configPath('typst.ts') })
+}}}
+import app from '@adonisjs/core/services/app'
+import { defineConfig } from '@typst-report/adonisjs'
+
+export default defineConfig({
+  /**
+   * The pinned Typst version: what `typst:install` downloads and what
+   * `typst:doctor` asserts. Typst is pre-1.0 and its layout shifts between
+   * minors, so every template is a validated visual snapshot — moving this
+   * is a deliberate act (bump here, re-check the documents), never a side
+   * effect of a deploy.
+   */
+  version: '0.15.1',
+
+  bin: process.env.TYPST_BIN ?? app.makePath('vendor/typst'),
+
+  /**
+   * Families your templates name. Typst falls back silently when one is
+   * missing, so `typst:doctor` asserting them is what turns a wrong-looking
+   * PDF into a failed deploy.
+   */
+  fonts: [],
+
+  // fontPath: app.makePath('resources/typst/fonts'),
+
+  /**
+   * Files placed into every compile, keyed by the path templates import:
+   * `#import "lib/brand.typ"`, `image("img/logo.svg")`.
+   */
+  libraries: {
+    // 'lib/brand.typ': { path: app.makePath('resources/typst/lib/brand.typ') },
+  },
+
+  /**
+   * Compiles allowed at once in this process. One is deliberate
+   * backpressure — raise it on hosts with cores and memory to spare, and
+   * remember a clustered runtime multiplies it by the number of workers.
+   */
+  concurrency: 1,
+  timeoutMs: 15_000,
+})
