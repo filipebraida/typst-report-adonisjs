@@ -4,6 +4,8 @@
 import app from '@adonisjs/core/services/app'
 import { defineConfig } from '@typst-report/adonisjs'
 
+import env from '#start/env'
+
 export default defineConfig({
   /**
    * The pinned Typst version: what 'typst:install' downloads and what
@@ -14,7 +16,7 @@ export default defineConfig({
    */
   version: '0.15.1',
 
-  bin: process.env.TYPST_BIN ?? app.makePath('vendor/typst'),
+  bin: env.get('TYPST_BIN') ?? app.makePath('vendor/typst'),
 
   /**
    * Families your templates name. Typst falls back silently when one is

@@ -60,5 +60,10 @@ test.group('stubs', () => {
     assert.include(output, 'version:')
     assert.include(output, 'bin:')
     assert.include(output, 'config/typst.ts')
+    // Reads the environment the way the rest of an AdonisJS app does —
+    // configure declares TYPST_BIN in start/env.ts to make this safe.
+    assert.include(output, "import env from '#start/env'")
+    assert.include(output, "env.get('TYPST_BIN')")
+    assert.notInclude(output, 'process.env')
   })
 })
