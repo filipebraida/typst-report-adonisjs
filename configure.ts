@@ -1,6 +1,10 @@
 import type ConfigureCommand from '@adonisjs/core/commands/configure'
 
+import { ensureLines } from './src/patch_file.js'
 import { stubsRoot } from './stubs/main.js'
+
+/** The binary path the generated config defaults to. */
+const DEFAULT_BIN = 'vendor/typst'
 
 export async function configure(command: ConfigureCommand) {
   const codemods = await command.createCodemods()
@@ -27,6 +31,32 @@ export async function configure(command: ConfigureCommand) {
       'Could not add TYPST_BIN to start/env.ts — add `TYPST_BIN: Env.schema.string.optional()` yourself, or set `bin` directly in config/typst.ts.'
     )
   }
+
+  // The downloaded binary is tens of megabytes. Committing it once is a
+  // mistake that outlives the commit, so the ignore rule ships with the
+  // command that creates the file rather than with the documentation.
+  const ignored = await ensureLines(
+    command.app.makePath('.gitignore'),
+    DEFAULT_BIN,
+    ['', '# Typst binary downloaded by `node ace typst:install`', DEFAULT_BIN].join('\n')
+  )
+  if (ignored === 'added') {
+    command.logger.action('update .gitignore').succeeded()
+  } else if (ignored === 'file-missing') {
+    command.logger.warning(`No .gitignore found — make sure ${DEFAULT_BIN} never gets committed.`)
+  }
+
+  // Documented, not set: TYPST_BIN is optional, and an empty value in .env
+  // would win over the fallback and leave `bin` pointing at nothing.
+  await ensureLines(
+    command.app.makePath('.env.example'),
+    'TYPST_BIN',
+    [
+      '',
+      `# Overrides the Typst binary path (default: ${DEFAULT_BIN}, via \`node ace typst:install\`)`,
+      '# TYPST_BIN=',
+    ].join('\n')
+  )
 
   command.logger.info('Next: run `node ace typst:install` to fetch the pinned binary.')
 }

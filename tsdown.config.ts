@@ -8,6 +8,7 @@ export default defineConfig({
     './providers/typst_provider.ts',
     './src/types.ts',
     './src/http.ts',
+    './src/patch_file.ts',
     './stubs/main.ts',
     './commands/main.ts',
     './commands/typst_install.ts',

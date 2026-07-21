@@ -19,8 +19,11 @@ node ace configure @typst-report/adonisjs
 node ace typst:install
 ```
 
-`configure` writes `config/typst.ts` and registers the provider and commands.
-`typst:install` downloads the pinned Typst binary, verifying its checksum.
+`configure` writes `config/typst.ts`, registers the provider and commands,
+declares `TYPST_BIN` in `start/env.ts`, and adds the binary's path to
+`.gitignore` — it is tens of megabytes, and committing it once is a mistake
+that outlives the commit. `typst:install` then downloads the pinned binary,
+verifying its checksum.
 
 ## Configure
 
