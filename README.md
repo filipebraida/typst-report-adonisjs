@@ -1,0 +1,1 @@
+# typst-report-adonisjs
