@@ -7,4 +7,3 @@ coverage
 build
 dist
 package-lock.json
-*.tgz
