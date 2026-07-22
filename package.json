@@ -1,7 +1,7 @@
 {
   "name": "@typst-report/adonisjs",
   "description": "AdonisJS integration for typst-report — renderer as a service, preflight, install and preview commands.",
-  "version": "0.1.0-alpha.3",
+  "version": "0.1.0-alpha.4",
   "engines": {
     "node": ">=24.0.0"
   },
