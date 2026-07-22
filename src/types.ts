@@ -1,4 +1,4 @@
-import type { FileSource, RenderEvent } from 'typst-report'
+import type { LibrarySource, RenderEvent } from 'typst-report'
 
 /**
  * Everything the application declares about its rendering environment —
@@ -23,8 +23,13 @@ export interface TypstConfig {
   /** Passed as `--font-path`. */
   fontPath?: string
 
-  /** Libraries placed into every compile, keyed by the path templates import. */
-  libraries?: Record<string, FileSource>
+  /**
+   * Libraries placed into every compile, keyed by the path templates import.
+   * Registered once per renderer and cached, so a function source is called
+   * once and takes no arguments — unlike per-compile `files`, which are read
+   * fresh every render.
+   */
+  libraries?: Record<string, LibrarySource>
 
   /** Passed as `--ignore-system-fonts`. Defaults to true (reproducibility). */
   ignoreSystemFonts?: boolean
