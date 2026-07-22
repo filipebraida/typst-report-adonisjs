@@ -14,16 +14,16 @@ opinions live.
 ## Install
 
 ```bash
-npm install @typst-report/adonisjs typst-report
-node ace configure @typst-report/adonisjs
+node ace add @typst-report/adonisjs
 node ace typst:install
 ```
 
-`configure` writes `config/typst.ts`, registers the provider and commands,
-declares `TYPST_BIN` in `start/env.ts`, and adds the binary's path to
-`.gitignore` — it is tens of megabytes, and committing it once is a mistake
-that outlives the commit. `typst:install` then downloads the pinned binary,
-verifying its checksum.
+`add` installs the package and runs `configure`, which pulls in the
+`typst-report` engine (a peer — your app owns which version renders), writes
+`config/typst.ts`, registers the provider and commands, declares `TYPST_BIN`
+in `start/env.ts`, and adds the binary's path to `.gitignore` — it is tens of
+megabytes, and committing it once is a mistake that outlives the commit.
+`typst:install` then downloads the pinned binary, verifying its checksum.
 
 ## Configure
 
@@ -58,10 +58,40 @@ import { signalFromResponse } from '@typst-report/adonisjs/http'
 const pdf = await typst.compile({
   template: app.makePath('app/documents/one_pager.typ'),
   data: viewModel,
-  files: { 'img/cover.webp': coverBuffer },
+  files: { 'img/cover.webp': coverBuffer }, // bytes you already hold
   signal: signalFromResponse(response),
 })
 ```
+
+### Images from Drive, without holding them all
+
+A `files` value can be a **function** instead of bytes. The engine calls it
+when the workdir reaches that entry, one at a time — so a book of 69 covers
+costs one image of memory, not 69, and nothing is downloaded until its turn
+comes. This is what makes `@adonisjs/drive` (S3, GCS, the local disk) a
+natural fit: the file never sits fully in the app.
+
+```ts
+import drive from '@adonisjs/drive/services/main'
+
+const disk = drive.use()
+
+const pdf = await typst.compile({
+  template: app.makePath('app/documents/book.typ'),
+  data: viewModel,
+  files: Object.fromEntries(
+    covers.map((c) => [`img/cover-${c.id}.webp`, () => disk.getStream(c.key)])
+  ),
+  signal: signalFromResponse(response),
+})
+```
+
+The function receives the compile's `signal`, and the engine checks it between
+entries — so when the client disconnects, the covers still queued are never
+fetched. A `getStream` that dies mid-download surfaces as a render error under
+that entry's key, exactly as a fetch that failed up front would. Pass a plain
+`Buffer` when you already have the bytes; reach for the function when they live
+somewhere you would rather stream than hold.
 
 The renderer is a container singleton, so the concurrency gate cannot be lost
 by constructing one per request. Inject it where you prefer that to the
