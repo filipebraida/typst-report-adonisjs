@@ -6,8 +6,25 @@ import { stubsRoot } from './stubs/main.js'
 /** The binary path the generated config defaults to. */
 const DEFAULT_BIN = 'vendor/typst'
 
+/**
+ * The rendering engine. A peer dependency, not bundled — the application owns
+ * which engine version renders its documents, the same reason the binary is a
+ * parameter. But it is not optional: the provider imports it at boot, so a
+ * configure that skips it leaves an app that crashes on the first request.
+ */
+const ENGINE_PACKAGE = { name: 'typst-report', isDevDependency: false }
+
 export async function configure(command: ConfigureCommand) {
   const codemods = await command.createCodemods()
+
+  // Installed here so `node ace add @typst-report/adonisjs` is one command, not
+  // an install that quietly omits the package everything else depends on.
+  // Re-running is harmless: an already-present engine just reinstalls.
+  if (!(await codemods.installPackages([ENGINE_PACKAGE]))) {
+    // Offline, a registry hiccup, a conflicting tree: don't strand a
+    // half-wired app — print the exact command left to run.
+    await codemods.listPackagesToInstall([ENGINE_PACKAGE])
+  }
 
   await codemods.makeUsingStub(stubsRoot, 'config.stub', {})
 
